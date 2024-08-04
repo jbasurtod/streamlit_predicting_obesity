@@ -29,8 +29,8 @@ This app uses the "Estimation of Obesity Levels Based On Eating Habits and Physi
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/your-repository-name.git
-   cd your-repository-name
+   git clone https://github.com/jbasurtod/streamlit_predicting_obesity.git
+   cd streamlit_predicting_obesity
 
 2. **Install the required dependencies**:
    ```bash
