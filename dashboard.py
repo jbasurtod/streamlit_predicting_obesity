@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 
 # Set the page configuration
-st.set_page_config(page_title="Obesity Risk Prediction", layout="wide")
+st.set_page_config(page_title="Obesity Risk Prediction with Random Forests and Neural Networks", layout="wide")
 
 # Sidebar with a link
 with st.sidebar:
@@ -11,48 +11,61 @@ with st.sidebar:
     st.markdown("[GitHub Profile](https://github.com/jbasurtod)", unsafe_allow_html=True)
 
 # Title of the Dashboard
-st.title("Obesity Risk Prediction")
+st.title("Obesity Prediction with Random Forests and Neural Networks")
 
 # Brief description of the model
 st.markdown("""
-    This application uses a Random Forest model trained to predict obesity based on five criteria. The model was trained using the **Estimation of Obesity Levels Based On Eating Habits and Physical Condition** dataset, which can be found [here](https://archive.ics.uci.edu/dataset/544/estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition). The model's recall in identifying obesity is 0.87, indicating a high ability to correctly identify individuals who fall into the obesity categories (I, II, or III). More information about the model training can be found in [this Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests).
+    This application uses either a Random Forest model or a Neural Network model trained to predict obesity based on five criteria. 
+    The model was trained using the **Estimation of Obesity Levels Based On Eating Habits and Physical Condition** [dataset](https://archive.ics.uci.edu/dataset/544/estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition).
+    
+    The Recalls in identifying obesity are 0.87 for the Random Forest model and 0.94 for the Neural Network model, indicating a high ability to correctly identify individuals 
+    who fall into the obesity categories (I, II, or III). More information about the models training can the found in the [Random Forest Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests) and in the [Neural Network Kaggle Notebook]().
 """)
 
-# Load the model from the pickle file
-model_path = "models/rf_model.pkl"  # Update with the correct file name
+# Dropdown menu to select model
+model_choice = st.selectbox(
+    "Select the model to use for prediction:",
+    options=["Random Forest Model", "Neural Network Model"],
+    index=0  # Default to "Random Forest Model"
+)
+
+# Load the Random Forest model
+model_path_rf = "models/rf_model.pkl"  # Update with the correct file name
 try:
-    with open(model_path, 'rb') as model_file:
-        model, threshold = pickle.load(model_file)
+    with open(model_path_rf, 'rb') as model_file:
+        model_rf, threshold_rf = pickle.load(model_file)
 except Exception as e:
-    st.error(f"An error occurred while loading the model: {e}")
+    st.error(f"An error occurred while loading the Random Forest model: {e}")
+
+# Load the Neural Network model
+model_path_nn = "models/NN_Model.pkl"  # Update with the correct file name
+try:
+    with open(model_path_nn, 'rb') as model_file:
+        model_nn, threshold_nn = pickle.load(model_file)
+except Exception as e:
+    st.error(f"An error occurred while loading the Neural Network model: {e}")
 
 # Requesting variables and their input types with default values
-
-# Age - Integer
 Age = st.number_input("What is your age? (Age)", min_value=0, max_value=120, value=31, step=1)
 
-# family_history_with_overweight_1 - Yes or No (default: No)
 family_history_with_overweight_1 = st.selectbox(
     "Do you have a family history with overweight? (family_history_with_overweight_1)",
     options=["Yes", "No"],
     index=0  # Default to "No"
 )
 
-# FAVC_1 - Yes or No (default: No)
 FAVC_1 = st.selectbox(
     "Do you frequently consume fruits and vegetables? (FAVC_1)",
     options=["Yes", "No"],
     index=0  # Default to "No"
 )
 
-# CAEC_Sometimes - Yes or No (default: No)
 CAEC_Sometimes = st.selectbox(
     "Do you sometimes consume high caloric food? (CAEC_Sometimes)",
     options=["Yes", "No"],
     index=0  # Default to "No"
 )
 
-# SCC_1 - Yes or No (default: No)
 SCC_1 = st.selectbox(
     "Do you monitor the calories you eat daily? (SCC_1)",
     options=["Yes", "No"],
@@ -75,15 +88,18 @@ if st.button("Predict"):
     })
     
     try:
-        # Make prediction
-        #prediction = model.predict(input_data)[0]
-        probability = model.predict_proba(input_data)[0][1]  # Probability of obesity class
-
-        # Get the prediction probabilities
-        probabilities = model.predict_proba(input_data)[0]
-        # Determine the final prediction based on the threshold
-        prediction = (probabilities[1] >= threshold).astype(int)
-
+        if model_choice == "Random Forest Model":
+            # Make prediction with Random Forest model
+            probabilities = model_rf.predict_proba(input_data)[0]
+            prediction = (probabilities[1] >= threshold_rf).astype(int)
+            probability = probabilities[1]
+        
+        elif model_choice == "Neural Network Model":
+            # Make prediction with Neural Network model
+            probabilities = model_nn.predict(input_data).ravel()
+            prediction = (probabilities >= threshold_nn).astype(int)
+            probability = probabilities[0]
+        
         # Determine the result message and color
         if prediction == 1:
             result_message = "Obesity Classification Detected"
