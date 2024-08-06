@@ -2,11 +2,11 @@
 
 ## Overview
 
-This Streamlit app is designed to predict the likelihood of obesity based on various health and lifestyle criteria. The model is a Random Forest classifier trained using the "Estimation of Obesity Levels Based On Eating Habits and Physical Condition" dataset from the UCI Machine Learning Repository. The recall for this model is 0.87 in identifying obesity.
+This Streamlit app is designed to predict the likelihood of obesity based on various health and lifestyle criteria. A Random Forest classifier and a Neural Network were trained using the "Estimation of Obesity Levels Based On Eating Habits and Physical Condition" dataset from the UCI Machine Learning Repository.
 
 ## Explore Further
 
-- **Kaggle Notebook**: Dive deeper into the analysis and code by visiting the Kaggle notebook [here](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests).
+- **Kaggle Notebook**: Dive deeper into the analysis and code by visiting the Kaggle notebooks for the [Random Forest](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests) and [Neural Network](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-neural-networks) models training. 
 - **Live Model**: Experience the model in action on the Streamlit app [here](https://obesitypred.streamlit.app/).
 
 ## App Features
@@ -19,7 +19,8 @@ This Streamlit app is designed to predict the likelihood of obesity based on var
 
 ## Model Performance
 
-- **Recall**: 0.87 in identifying obesity
+- **Random Forest Recall**: 0.87 in identifying obesity
+- **Neural Network Recall**: 0.94 in identifying obesity
 
 ## Dataset
 

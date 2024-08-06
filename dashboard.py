@@ -11,15 +11,14 @@ with st.sidebar:
     st.markdown("[GitHub Profile](https://github.com/jbasurtod)", unsafe_allow_html=True)
 
 # Title of the Dashboard
-st.title("Obesity Prediction with Random Forests and Neural Networks")
+st.title("Predicting Obesity with Random Forests and Neural Networks")
 
 # Brief description of the model
 st.markdown("""
-    This application uses either a Random Forest model or a Neural Network model trained to predict obesity based on five criteria. 
-    The model was trained using the **Estimation of Obesity Levels Based On Eating Habits and Physical Condition** [dataset](https://archive.ics.uci.edu/dataset/544/estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition).
+    This application uses either a Random Forest or a Neural Network model trained to predict obesity based on five criteria. 
+    The models were trained using the **Estimation of Obesity Levels Based On Eating Habits and Physical Condition** [dataset](https://archive.ics.uci.edu/dataset/544/estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition).
     
-    The Recalls in identifying obesity are 0.87 for the Random Forest model and 0.94 for the Neural Network model, indicating a high ability to correctly identify individuals 
-    who fall into the obesity categories (I, II, or III). More information about the models training can the found in the [Random Forest Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests) and in the [Neural Network Kaggle Notebook]().
+    The Recalls in identifying obesity are 0.87 for the Random Forest and 0.94 for the Neural Network. More information about their training can the found in the [Random Forest Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests) and in the [Neural Network Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-neural-networks).
 """)
 
 # Dropdown menu to select model
