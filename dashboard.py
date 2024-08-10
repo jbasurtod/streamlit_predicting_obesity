@@ -18,7 +18,7 @@ st.markdown("""
     This application uses either a Random Forest or a Neural Network model trained to predict obesity based on five criteria. 
     The models were trained using the **Estimation of Obesity Levels Based On Eating Habits and Physical Condition** [dataset](https://archive.ics.uci.edu/dataset/544/estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition).
     
-    The Recalls in identifying obesity are 0.87 for the Random Forest and 0.86 for the Neural Network. More information about their training can the found in the [Random Forest Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests) and in the [Neural Network Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-neural-networks).
+    The Recalls in identifying obesity are 0.85 for the Random Forest and 0.86 for the Neural Network (@ optimal threshold for generalization). More information about their training can the found in the [Random Forest Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests) and in the [Neural Network Kaggle Notebook](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-neural-networks).
 """)
 
 # Dropdown menu to select model
