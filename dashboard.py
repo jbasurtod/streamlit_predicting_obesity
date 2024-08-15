@@ -1,5 +1,7 @@
 import streamlit as st
-import requests
+import joblib
+import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 # Set the page configuration
 st.set_page_config(page_title="Obesity Risk Prediction", layout="wide")
@@ -20,10 +22,29 @@ with st.sidebar:
 # Title of the Dashboard
 st.title("Obesity Risk Prediction")
 
-# Brief description of the model
+# Updated brief description of the models
 st.markdown("""
-    This application uses a Random Forest model trained to predict obesity based on five criteria. The model was trained using the **Estimation of Obesity Levels Based On Eating Habits and Physical Condition** dataset, which can be found [here](https://archive.ics.uci.edu/dataset/544/estimation+of+obesity+levels+based+on+eating+habits+and+physical+condition). The model's recall in identifying obesity is 0.87, indicating a high ability to correctly identify individuals who fall into the obesity categories (I, II, or III).
+    This application uses two models to predict obesity based on 5 criteria after being trained with SelectKBest. The [Random Forest model](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-random-forests#Testing-the-Random-Forest-Model) achieves a recall of 0.87 for class 1, while the [Neural Network model](https://www.kaggle.com/code/jbasurtod/predicting-obesity-with-neural-networks#Testing-the-Models) achieves a recall of 0.86 at its optimal threshold. For more details on their training, please refer to the linked Kaggle notebooks.
 """)
+
+# Load the models and scaler
+@st.cache_resource
+def load_models():
+    # Load Random Forest model and unpack if necessary
+    rf_model_tuple = joblib.load('models/rf_model.pkl')
+    rf_model, _ = rf_model_tuple  # Unpack the model from the tuple
+    # Load Neural Network model, scaler, and optimal threshold
+    nn_model_tuple = joblib.load('models/NN_model.pkl')
+    nn_model, scaler, optimal_threshold = nn_model_tuple
+    return rf_model, nn_model, scaler, optimal_threshold
+
+rf_model, nn_model, scaler, optimal_threshold = load_models()
+
+# Dropdown menu for selecting the model
+model_option = st.selectbox(
+    "Choose the model to use for prediction:",
+    options=["Random Forest", "Neural Network"]
+)
 
 # Requesting variables and their input types with default values
 
@@ -64,48 +85,46 @@ def convert_yes_no(value):
 
 # Button to send request and show result
 if st.button("Predict"):
-    # Prepare the data to send
-    data = {
-        "age": Age,
-        "family_history_with_overweight": convert_yes_no(family_history_with_overweight_1),
-        "FAVC": convert_yes_no(FAVC_1),
-        "CAEC": convert_yes_no(CAEC_Sometimes),
-        "SCC": convert_yes_no(SCC_1)
-    }
-    
-    # URL to send the POST request to
-    url = "https://o6boj2ehlmpw3udg5qfienm3tu0vmpwc.lambda-url.eu-north-1.on.aws/predict"  # Replace with your actual URL
-    
-    try:
-        # Send the POST request with the JSON data
-        response = requests.post(url, json=data)
-        response.raise_for_status()  # Raise an error for bad responses
-        
-        # Get the response JSON
-        response_json = response.json()
-        prediction = response_json.get("prediction")
-        probabilities = response_json.get("probabilities", [])
-        
-        # Handle the case where the probabilities list might not have the expected elements
-        if len(probabilities) > 1:
-            probability_1 = probabilities[1]
-        else:
-            probability_1 = 0  # Default to 0 if the list does not have the expected element
-        
-        # Determine the result message and color
-        if prediction == 1:
-            result_message = "Obesity Classification Detected"
-            color = "#FFA500"  # Orange color
-        else:
-            result_message = "No Obesity Classification Detected"
-            color = "#1E90FF"  # Blue color
-        
-        # Convert probability to percentage
-        probability_percentage = f"{probability_1 * 100:.2f}%"
-        
-        # Display the result with the appropriate color and probability
-        st.markdown(f"<h1 style='text-align: center; color: {color};'>{result_message}</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h3 style='text-align: center;'>Probability: {probability_percentage}</h3>", unsafe_allow_html=True)
-    
-    except requests.exceptions.RequestException as e:
-        st.error(f"An error occurred: {e}")
+    # Prepare the data
+    age_feature = np.array([Age]).reshape(1, -1)
+    other_features = np.array([
+        convert_yes_no(family_history_with_overweight_1),
+        convert_yes_no(FAVC_1),
+        convert_yes_no(CAEC_Sometimes),
+        convert_yes_no(SCC_1)
+    ]).reshape(1, -1)
+
+    if model_option == "Random Forest":
+        # Combine all features
+        input_data = np.hstack([age_feature, other_features])
+        # Predict with Random Forest model
+        probabilities = rf_model.predict_proba(input_data)[0]
+        prediction = np.argmax(probabilities)  # Get the index of the maximum probability
+        probability = probabilities[1] if len(probabilities) > 1 else probabilities[0]
+
+    else:
+        # Scale only the Age feature
+        scaled_age = scaler.transform(age_feature)
+        # Combine scaled Age with other features
+        scaled_data = np.hstack([scaled_age, other_features])
+        # Predict with Neural Network model
+        probabilities = nn_model.predict(scaled_data)[0]
+        # Apply the optimal threshold to determine the class
+        prediction = (probabilities > optimal_threshold).astype(int)[0]
+        # Use the probability of the positive class for displaying
+        probability = probabilities[1] if len(probabilities) > 1 else probabilities[0]
+
+    # Determine the result message and color
+    if prediction == 1:
+        result_message = "Obesity Classification Detected"
+        color = "#FFA500"  # Orange color
+    else:
+        result_message = "No Obesity Classification Detected"
+        color = "#1E90FF"  # Blue color
+
+    # Convert probability to percentage
+    probability_percentage = f"{probability * 100:.2f}%"
+
+    # Display the result with the appropriate color and probability
+    st.markdown(f"<h1 style='text-align: center; color: {color};'>{result_message}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align: center;'>Probability: {probability_percentage}</h3>", unsafe_allow_html=True)
